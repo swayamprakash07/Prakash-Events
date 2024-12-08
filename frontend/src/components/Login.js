@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { GlobalContext } from "../globalContext";
 
 // Import baseUrl from .env file
-const baseUrl = process.env.REACT_APP_BASE_URL;
-
+const baseUrl = (process.env.REACT_APP_BASE_URL).replace(/^"|"$/g, "");
+console.log("hi",baseUrl);
 const Login = () => {
   const { globalState, setGlobalState } = useContext(GlobalContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState(globalState.role);
+  const [role, setRole] = useState(globalState.role || "user");
   const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
@@ -21,11 +21,14 @@ const Login = () => {
       let endpoint = "";
       if (role === "user") {
         endpoint = `${baseUrl}/user/login`;
+        console.log("swayam",endpoint);
       } else if (role === "admin") {
         endpoint = `${baseUrl}/admin/login`;
       } else if (role === "vendor") {
         endpoint = `${baseUrl}/vender/login`;
       }
+      console.log("here it is", role);
+
 
       // Make a POST request to the backend
       const response = await fetch(endpoint, {
@@ -37,7 +40,6 @@ const Login = () => {
       });
 
       const data = await response.json();
-      console.log("here it is", data[0].data.email);
       if (response.ok) {
         // Update global state with login details
         setGlobalState({
@@ -49,10 +51,12 @@ const Login = () => {
 
         console.log("Global State Updated:", { email: data[0].data.email, role:data[0].data.role });
         // Redirect to appropriate dashboard
+        console.log("role",role);
         if (role === "user") {
           navigate("/user");
         } else if (role === "admin") {
-          navigate("/admin/dashboard");
+          window.location.href = "/admin/dashboard";
+
         } else if (role === "vendor") {
           navigate("/vendor/dashboard");
         }
